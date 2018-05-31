@@ -85,26 +85,41 @@ def convert_mth_strings ( mth_string ):
 
 #### VARIABLES 1.0
 
-entity_id = "E0931_ABC_gov"
-url = "https://www.allerdale.gov.uk/en/about-council/budget-and-spending/spending-council/"
+entity_id = "E1032_BDC_gov"
+url = "http://www.bolsover.gov.uk/index.php/90-your-council/budgets/264-your-council-payments-of-250"
 errors = 0
 data = []
-
 
 #### READ HTML 1.0
 
 html = urllib2.urlopen(url)
-soup = BeautifulSoup(html, "lxml")
+soup = BeautifulSoup(html, 'lxml')
 
 #### SCRAPE DATA
 
-links = soup.find_all('a')
+links = soup.find('div', attrs={'itemprop':'articleBody'}).find_all('a')
 for link in links:
-    file_name = link.text
-    if 'Spending' in file_name and '.csv' in link['href']:
-        url = link['href']
-        csvYr = file_name.replace('Spending ', '').strip()[-4:]
-        csvMth = file_name.replace('Spending ', '').strip()[:3]
+    if '.csv' in link['href']:
+        file_name = link.text
+        if 'http' not in link['href']:
+            url = 'http://www.bolsover.gov.uk'+link['href']
+        else:
+            url = link['href']
+        if 'April 2017 - 31 May' in file_name:
+            csvMth = 'Q0'
+            csvYr = '2017'
+        if 'April 2016 - 31 March' in file_name:
+            csvMth = 'Y1'
+            csvYr = '2016'
+        if 'April 2015 to 31 March' in file_name:
+            csvMth = 'Y1'
+            csvYr = '2015'
+        if 'April 2013 to 31st March' in file_name:
+            csvMth = 'Y1'
+            csvYr = '2013'
+        if 'April 2014 to 31' in file_name:
+            csvMth = 'Y1'
+            csvYr = '2014'
         csvMth = convert_mth_strings(csvMth.upper())
         data.append([csvYr, csvMth, url])
 
